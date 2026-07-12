@@ -16,8 +16,8 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="w-full py-24 px-margin-mobile md:px-margin-desktop bg-tertiary text-on-tertiary">
-      <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-y-16 md:gap-gutter">
+    <footer className="w-full py-24 px-margin-mobile md:px-margin-desktop bg-tertiary text-on-tertiary font-light">
+      <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-y-16 md:gap-gutter font-light">
         {/* Brand & Newsletter */}
         <div className="md:col-span-5 flex flex-col justify-between">
           <div>
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
               <Logo className="h-9 w-9 mr-2" invert={true} />
               <span>La Forêt</span>
             </button>
-            <p className="font-body-md text-on-tertiary/60 mb-10 max-w-sm">
+            <p className="font-body-md text-on-tertiary/60 mb-10 max-w-sm font-light leading-relaxed">
               Join our quiet community. Receive occasional reflections on design, architecture, and new object releases.
             </p>
             <form onSubmit={handleSubmit} className="flex items-end gap-0 max-w-md group">
@@ -40,14 +40,14 @@ export const Footer: React.FC = () => {
               />
               <button
                 type="submit"
-                className="border-b border-on-tertiary/40 px-6 pb-3 font-label-md text-label-md uppercase tracking-widest hover:text-white hover:border-on-tertiary transition-all"
+                className="border-b border-on-tertiary/40 px-6 pb-3 font-label-md text-label-md uppercase tracking-widest hover:text-white hover:border-on-tertiary transition-all font-semibold"
               >
                 Join
               </button>
             </form>
           </div>
-          <div className="mt-16 md:mt-0 space-y-1">
-            <p className="font-label-sm text-label-sm text-on-tertiary/40">© 2024 La Forêt. All rights reserved.</p>
+          <div className="mt-16 md:mt-0 space-y-1.5">
+            <p className="font-label-sm text-label-sm text-on-tertiary/40">© 2026 La Forêt. All rights reserved.</p>
             <p className="font-label-sm text-label-sm text-on-tertiary/30">© 2026 AADHITYA S</p>
           </div>
         </div>
@@ -74,6 +74,16 @@ export const Footer: React.FC = () => {
             <li>
               <button onClick={(e) => handleNavClick('journal', e)} className="font-body-md text-on-tertiary/60 hover:text-white transition-colors text-left border-0 bg-transparent p-0 cursor-pointer outline-none">
                 Journal
+              </button>
+            </li>
+            <li>
+              <button onClick={(e) => handleNavClick('case-study', e)} className="font-body-md text-on-tertiary/60 hover:text-white transition-colors text-left border-0 bg-transparent p-0 cursor-pointer outline-none">
+                Case Study
+              </button>
+            </li>
+            <li>
+              <button onClick={(e) => handleNavClick('design-system', e)} className="font-body-md text-on-tertiary/60 hover:text-white transition-colors text-left border-0 bg-transparent p-0 cursor-pointer outline-none">
+                Design System
               </button>
             </li>
           </ul>

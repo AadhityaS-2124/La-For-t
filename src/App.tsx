@@ -1,10 +1,13 @@
 import React from 'react';
-import { CartProvider } from './context/CartContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CartProvider, useCart } from './context/CartContext';
 import { RouterProvider, useRouter } from './context/RouterContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
+import { SearchOverlay } from './components/SearchOverlay';
+import { ProductQuickView } from './components/ProductQuickView';
 
 // Views
 import { HomeView } from './views/HomeView';
@@ -12,6 +15,8 @@ import { ObjectsView } from './views/ObjectsView';
 import { ProductDetailView } from './views/ProductDetailView';
 import { AboutView } from './views/AboutView';
 import { JournalView } from './views/JournalView';
+import { CaseStudyView } from './views/CaseStudyView';
+import { DesignSystemView } from './views/DesignSystemView';
 
 // Footer & Social Views
 import { PrivacyView } from './views/PrivacyView';
@@ -23,39 +28,74 @@ import { PinterestView } from './views/PinterestView';
 
 const AppContent: React.FC = () => {
   const { currentPath } = useRouter();
+  const { isCartOpen, isSearchOpen, quickViewProduct, checkoutStep } = useCart();
 
   // Route matching logic
   const renderActiveView = () => {
+    let view;
     switch (currentPath) {
       case '':
-        return <HomeView />;
+        view = <HomeView />;
+        break;
       case 'objects':
-        return <ObjectsView />;
+        view = <ObjectsView />;
+        break;
       case 'about':
-        return <AboutView />;
+        view = <AboutView />;
+        break;
       case 'journal':
-        return <JournalView />;
+        view = <JournalView />;
+        break;
+      case 'case-study':
+        view = <CaseStudyView />;
+        break;
+      case 'design-system':
+        view = <DesignSystemView />;
+        break;
       case 'privacy':
-        return <PrivacyView />;
+        view = <PrivacyView />;
+        break;
       case 'terms':
-        return <TermsView />;
+        view = <TermsView />;
+        break;
       case 'shipping':
-        return <ShippingView />;
+        view = <ShippingView />;
+        break;
       case 'contact':
-        return <ContactView />;
+        view = <ContactView />;
+        break;
       case 'instagram':
-        return <InstagramView />;
+        view = <InstagramView />;
+        break;
       case 'pinterest':
-        return <PinterestView />;
+        view = <PinterestView />;
+        break;
       default:
         // Handle dynamic paths
         if (currentPath.startsWith('objects/')) {
           const id = currentPath.split('/')[1];
-          return <ProductDetailView productId={id} />;
+          view = <ProductDetailView productId={id} />;
+        } else {
+          view = <HomeView />;
         }
-        // Fallback
-        return <HomeView />;
     }
+
+    const isInstagram = currentPath === 'instagram';
+
+    // Disable transition wrap for Instagram because it has a unique immersive layout
+    if (isInstagram) return view;
+
+    return (
+      <motion.div
+        key={currentPath}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {view}
+      </motion.div>
+    );
   };
 
   const isSocialRoute = currentPath === 'instagram';
@@ -73,14 +113,29 @@ const AppContent: React.FC = () => {
       <Header />
       
       <main className="flex-grow">
-        {renderActiveView()}
+        <AnimatePresence mode="wait">
+          {renderActiveView()}
+        </AnimatePresence>
       </main>
       
       <Footer />
       
-      {/* Drawers and Overlays */}
-      <CartDrawer />
-      <CheckoutModal />
+      {/* Animated Drawers and Overlays using AnimatePresence */}
+      <AnimatePresence>
+        {isCartOpen && <CartDrawer />}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {checkoutStep !== 'idle' && <CheckoutModal />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isSearchOpen && <SearchOverlay />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {quickViewProduct !== null && <ProductQuickView />}
+      </AnimatePresence>
     </div>
   );
 };

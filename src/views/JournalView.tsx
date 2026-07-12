@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Article {
   id: string;
@@ -60,14 +61,25 @@ export const JournalView: React.FC = () => {
 
   const activeArticle = journalArticles.find(a => a.id === selectedArticleId);
 
+  // Stagger entry animations
+  const listVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.15 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 25 },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, damping: 20 } }
+  };
+
   if (activeArticle) {
     return (
       <section className="min-h-screen pt-36 pb-24 px-margin-mobile md:px-margin-desktop bg-[#FBFBF9] max-w-container-max mx-auto text-primary">
-        {/* Back button */}
+        {/* Back Link */}
         <div className="mb-12">
           <button
             onClick={() => setSelectedArticleId(null)}
-            className="flex items-center gap-1.5 text-secondary hover:text-primary transition-colors py-1 group"
+            className="flex items-center gap-1.5 text-secondary hover:text-primary transition-colors py-1 group focus-visible:outline-none"
           >
             <span className="material-symbols-outlined text-[20px] transition-transform group-hover:-translate-x-1">
               arrow_back
@@ -76,16 +88,21 @@ export const JournalView: React.FC = () => {
           </button>
         </div>
 
-        {/* Article content */}
-        <article className="max-w-3xl mx-auto">
-          <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest block mb-4">
+        {/* Narrative Article Details */}
+        <motion.article
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto"
+        >
+          <span className="font-label-sm text-label-sm text-accent-sage uppercase tracking-widest block mb-4 font-semibold">
             {activeArticle.category} • {activeArticle.date}
           </span>
-          <h1 className="font-headline-lg text-[36px] sm:text-[44px] md:text-[52px] leading-tight mb-12 text-primary">
+          <h1 className="font-headline-lg text-[36px] sm:text-[44px] md:text-[52px] leading-tight mb-12 text-primary font-normal">
             {activeArticle.title}
           </h1>
 
-          <div className="aspect-[16/9] w-full bg-surface-container overflow-hidden mb-16">
+          <div className="aspect-[16/9] w-full bg-surface-container overflow-hidden mb-16 border border-primary/5">
             <img
               className="w-full h-full object-cover grayscale"
               src={activeArticle.image}
@@ -98,7 +115,7 @@ export const JournalView: React.FC = () => {
               <p key={index}>{paragraph}</p>
             ))}
           </div>
-        </article>
+        </motion.article>
       </section>
     );
   }
@@ -107,32 +124,43 @@ export const JournalView: React.FC = () => {
     <section className="min-h-screen pt-36 pb-24 px-margin-mobile md:px-margin-desktop bg-[#FBFBF9] max-w-container-max mx-auto text-primary">
       {/* Header */}
       <div className="text-center mb-20">
-        <h1 className="font-headline-lg text-headline-lg mb-2">The Journal</h1>
-        <p className="font-body-md text-body-md text-secondary max-w-md mx-auto">
+        <span className="font-label-sm text-[11px] text-accent-sage uppercase tracking-[0.25em] block mb-3 font-semibold">
+          REFLECTIONS
+        </span>
+        <h1 className="font-headline-lg text-headline-lg mb-2 font-normal">The Journal</h1>
+        <p className="font-body-md text-body-md text-secondary max-w-md mx-auto leading-relaxed font-light">
           Reflections on architectural garments, design philosophy, and sustainable studio practices.
         </p>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-gutter">
+      {/* Articles Grid with staggered entrance */}
+      <motion.div
+        variants={listVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-gutter"
+      >
         {journalArticles.map((article) => (
-          <div
+          <motion.div
             key={article.id}
+            variants={itemVariants}
             onClick={() => setSelectedArticleId(article.id)}
             className="group cursor-pointer flex flex-col justify-between"
           >
             <div>
-              {/* Image */}
-              <div className="aspect-[4/3] w-full overflow-hidden mb-6 bg-surface-container">
-                <img
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+              {/* Image with zoom effect */}
+              <div className="aspect-[4/3] w-full overflow-hidden mb-6 bg-surface-container border border-primary/5">
+                <motion.img
+                  whileHover={{ scale: 1.04 }}
+                  transition={{ duration: 0.6 }}
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0"
                   src={article.image}
                   alt={article.title}
                 />
               </div>
 
-              {/* Meta */}
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest block mb-2">
+              {/* Meta details */}
+              <span className="font-label-sm text-[11px] text-secondary uppercase tracking-widest block mb-2 font-semibold">
                 {article.category} • {article.date}
               </span>
 
@@ -141,21 +169,21 @@ export const JournalView: React.FC = () => {
                 {article.title}
               </h3>
 
-              {/* Excerpt */}
-              <p className="font-body-md text-body-md text-secondary line-clamp-3">
+              {/* Excerpt excerpt */}
+              <p className="font-body-md text-body-md text-secondary line-clamp-3 leading-relaxed font-light">
                 {article.excerpt}
               </p>
             </div>
 
-            {/* Read action */}
+            {/* CTA action trigger */}
             <div className="mt-6 pt-4 border-t border-primary/5">
-              <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary border-b border-primary/30 pb-0.5 group-hover:border-primary transition-all">
+              <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary border-b border-primary/20 pb-1 group-hover:border-primary transition-all font-semibold">
                 Read Entry →
               </span>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 };

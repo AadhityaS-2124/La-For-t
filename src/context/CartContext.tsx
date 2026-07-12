@@ -11,25 +11,42 @@ export type CheckoutStep = 'idle' | 'processing' | 'finalizing' | 'success';
 interface CartContextType {
   cartItems: CartItem[];
   isCartOpen: boolean;
+  isSearchOpen: boolean;
+  quickViewProduct: Product | null; // Quick View Addition
   checkoutStep: CheckoutStep;
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   setCartOpen: (open: boolean) => void;
+  setSearchOpen: (open: boolean) => void;
+  setQuickViewProduct: (product: Product | null) => void; // Quick View Addition
   setCheckoutStep: (step: CheckoutStep) => void;
   totalItems: number;
   subtotal: number;
+  
+  // Wishlist additions
+  wishlistItems: Product[];
+  toggleWishlist: (product: Product) => void;
+  isWishlisted: (productId: string) => boolean;
+
+  // Recently Viewed additions
+  recentlyViewed: Product[];
+  addToRecentlyViewed: (product: Product) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
   const [isCartOpen, setCartOpen] = useState(false);
+  const [isSearchOpen, setSearchOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null); // Quick View Addition
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>('idle');
 
-  // Sync cart to local storage for realistic persistence
+  // Load state from local storage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('la_foret_cart');
     if (savedCart) {
@@ -37,6 +54,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCartItems(JSON.parse(savedCart));
       } catch (e) {
         console.error('Failed to parse cart items', e);
+      }
+    }
+
+    const savedWishlist = localStorage.getItem('la_foret_wishlist');
+    if (savedWishlist) {
+      try {
+        setWishlistItems(JSON.parse(savedWishlist));
+      } catch (e) {
+        console.error('Failed to parse wishlist items', e);
+      }
+    }
+
+    const savedRecent = localStorage.getItem('la_foret_recent');
+    if (savedRecent) {
+      try {
+        setRecentlyViewed(JSON.parse(savedRecent));
+      } catch (e) {
+        console.error('Failed to parse recently viewed items', e);
       }
     }
   }, []);
@@ -76,6 +111,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveCart([]);
   };
 
+  // Wishlist handlers
+  const toggleWishlist = (product: Product) => {
+    let updated: Product[];
+    if (wishlistItems.some(item => item.id === product.id)) {
+      updated = wishlistItems.filter(item => item.id !== product.id);
+    } else {
+      updated = [...wishlistItems, product];
+    }
+    setWishlistItems(updated);
+    localStorage.setItem('la_foret_wishlist', JSON.stringify(updated));
+  };
+
+  const isWishlisted = (productId: string) => {
+    return wishlistItems.some(item => item.id === productId);
+  };
+
+  // Recently Viewed handler
+  const addToRecentlyViewed = (product: Product) => {
+    const base = recentlyViewed.filter(item => item.id !== product.id);
+    const updated = [product, ...base].slice(0, 4);
+    setRecentlyViewed(updated);
+    localStorage.setItem('la_foret_recent', JSON.stringify(updated));
+  };
+
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
@@ -84,15 +143,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         cartItems,
         isCartOpen,
+        isSearchOpen,
+        quickViewProduct,
         checkoutStep,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
         setCartOpen,
+        setSearchOpen,
+        setQuickViewProduct,
         setCheckoutStep,
         totalItems,
-        subtotal
+        subtotal,
+        wishlistItems,
+        toggleWishlist,
+        isWishlisted,
+        recentlyViewed,
+        addToRecentlyViewed
       }}
     >
       {children}
